@@ -34,6 +34,11 @@ curl -s \
      --data @/alloc/nomad_scraper.json \
      --header "Authorization: Token ${INFLUX_TOKEN}"
 echo ""
+
+echo "$(date) Building link file"
+DASH_ID=$(influx dashboards --hide-headers | awk '/Wave Dashboard/ { print $1 }')
+echo "Influx Dashboard Link" >> /alloc/link.txt
+echo "http://${INFLUX_ADDR}:8086/orgs/${ORG_ID}/dashboards/${DASH_ID}?lower=now%28%29%20-%205m" >> /alloc/link.txt
 echo "$(date) Done."
 
 exit 0
