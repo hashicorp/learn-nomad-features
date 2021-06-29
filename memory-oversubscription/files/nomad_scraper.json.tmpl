@@ -2,7 +2,7 @@
 {
 	"name": "Nomad",
 	"type": "prometheus",
-	"url": "http://{{ env "NOMAD_IP_db" }}:4646/v1/metrics?format=prometheus",
+	"url": "http://{{ env "NOMAD_IP_influx" }}:4646/v1/metrics?format=prometheus",
 	"orgID": "«orgid»",
 	"bucketID": "«bucketid»",
 	"allowInsecure": true

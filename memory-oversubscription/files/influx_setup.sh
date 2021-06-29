@@ -20,6 +20,7 @@ echo "Reading in influx environment variables"
 INFLUX_TOKEN=$(influx auth list -u admin --hide-headers | awk '{print $4}')
 ORG_ID=$(influx org list --hide-headers | awk '{print $1}')
 BUCKET_ID=$(influx bucket list --hide-headers | grep nomad | awk '{print $1}')
+DASHBOARD_ID=$(influx dashboards --hide-headers | awk '/Wave Dashboard/ { print $1 }')
 EOT
 
 chmod 755 /alloc/influx.env
