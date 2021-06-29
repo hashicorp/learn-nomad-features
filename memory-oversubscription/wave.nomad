@@ -7,14 +7,8 @@ job "wave" {
 
       config {
         force_pull = true
-        image = "voiselle/wave:v4"
-        args = [
-         "300",
-         "200",
-         "15",
-         "32",
-         "4"
-        ]
+        image = "voiselle/wave:v5"
+        args = [ "300", "200", "15", "64", "4" ]
       }
 
       resources {

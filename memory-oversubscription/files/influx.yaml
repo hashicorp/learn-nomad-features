@@ -1,131 +1,33 @@
 apiVersion: influxdata.com/v2alpha1
-kind: Bucket
-metadata:
-    name: kind-panini-7e7001
-spec:
-    name: metrics
----
-apiVersion: influxdata.com/v2alpha1
-kind: Bucket
-metadata:
-    name: rustling-ishizaka-be7001
-spec:
-    name: nomad
----
-apiVersion: influxdata.com/v2alpha1
-kind: Variable
-metadata:
-    name: fervent-ride-be7003
-spec:
-    language: flux
-    name: nomad_clients
-    query: |-
-        from(bucket: "nomad")
-          |> range(start: v.timeRangeStart, stop: v.timeRangeStop)
-          |> filter(fn: (r) => r["_measurement"] == "nomad_client_uptime")
-          |> keep(columns:["host"])
-          |> group(columns: ["host"])
-          |> yield(name: "clients")
-    type: query
----
-apiVersion: influxdata.com/v2alpha1
 kind: Dashboard
 metadata:
-    name: condescending-archimedes-3e7001
+    name: frosty-dhawan-b40001
 spec:
     charts:
-      - axes:
-          - base: "10"
-            name: x
-            scale: linear
-          - base: "10"
-            name: "y"
-            scale: linear
-        colors:
-          - hex: '#31C0F6'
-            id: 28b0e6ac-801c-46ee-a1a8-f15a263e5561
-            name: Nineteen Eighty Four
-            type: scale
-          - hex: '#A500A5'
-            id: 91514c6c-4d80-44ae-97bb-6e09989322c5
-            name: Nineteen Eighty Four
-            type: scale
-          - hex: '#FF7E27'
-            id: 9a93df20-aab8-4299-ad98-e76d45c10a08
-            name: Nineteen Eighty Four
-            type: scale
-        geom: line
-        height: 3
-        hoverDimension: auto
-        kind: Xy
-        legendColorizeRows: true
-        legendOpacity: 1
-        legendOrientationThreshold: 1e+08
-        name: CPU Stats
-        position: overlaid
+      - colors:
+          - hex: '#00C9FF'
+            id: base
+            name: laser
+            type: text
+        decimalPlaces: 0
+        height: 1
+        kind: Single_Stat
+        name: Current Allocation ID
         queries:
           - query: |-
-                import "strings"
                 from(bucket: "nomad")
-                  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)
-                  |> filter(fn: (r) => r["_measurement"] == "nomad_client_allocs_cpu_system" or r["_measurement"] == "nomad_client_allocs_cpu_user" or r["_measurement"] == "nomad_client_allocs_cpu_allocated")
+                  |> range(start: -10s, stop: v.timeRangeStop)
+                  |> filter(fn: (r) => r["_measurement"] == "nomad_client_allocs_memory_max_usage")
                   |> filter(fn: (r) => r["task"] == "wave")
-                  |> aggregateWindow(every: 10s, fn: max, createEmpty: false)
-                  |> drop(columns: ["_field","_start","_stop","job","namespace","task", "host", "task_group"])
-                  |> map(fn: (r) => ({ r with _measurement: strings.replaceAll(v: r._measurement, t: "nomad_client_allocs_cpu_", u: "") }))
-                  |> yield(name: "max")
-        width: 5
-        xCol: _time
-        yCol: _value
+                  |> unique(column: "alloc_id")
+                  |> map(fn: (r) => ({_value: r.alloc_id}))
+                  |> yield(name: "alloc")
+        width: 12
       - axes:
           - base: "10"
             name: x
             scale: linear
-          - name: "y"
-            scale: linear
-        colors:
-          - hex: '#DC4E58'
-            id: c44cd48a-7321-443f-bcce-e33296f6ce8a
-            name: Solid Red
-            type: scale
-          - hex: '#DC4E58'
-            id: aa14784f-45e5-4836-ae2c-07eca8b42b3a
-            name: Solid Red
-            type: scale
-          - hex: '#DC4E58'
-            id: b5cc6639-666c-4d1f-a957-65edf9b3f300
-            name: Solid Red
-            type: scale
-        generateYAxisTicks:
-          - yTickStart
-          - yTickStep
-        geom: step
-        height: 3
-        hoverDimension: auto
-        kind: Xy
-        legendColorizeRows: true
-        legendOpacity: 1
-        legendOrientationThreshold: 1e+08
-        name: OOM Kill Events
-        position: overlaid
-        queries:
-          - query: |-
-                from(bucket: "nomad")
-                  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)
-                  |> filter(fn: (r) => r["_measurement"] == "nomad_client_allocs_oom_killed")
-                  |> derivative(unit: 10s, nonNegative: true)
-                  |> yield(name: "nonnegative derivative")
-        shade: true
-        width: 5
-        xCol: _time
-        yCol: _value
-        yPos: 3
-        yTickStep: 1
-      - axes:
-          - base: "10"
-            name: x
-            scale: linear
-          - base: "10"
+          - base: "2"
             name: "y"
             scale: linear
         colors:
@@ -157,13 +59,169 @@ spec:
                   |> range(start: v.timeRangeStart, stop: v.timeRangeStop)
                   |> filter(fn: (r) => r["_measurement"] == "nomad_client_allocs_memory_allocated" or r["_measurement"] == "nomad_client_allocs_memory_cache" or r["_measurement"] == "nomad_client_allocs_memory_max_usage" or r["_measurement"] == "nomad_client_allocs_memory_rss" or r["_measurement"] == "nomad_client_allocs_memory_swap" or r["_measurement"] == "nomad_client_allocs_memory_usage")
                   |> filter(fn: (r) => r["task"] == "wave")
-                  |> aggregateWindow(every: v.windowPeriod, fn: last, createEmpty: false)
+                  |> aggregateWindow(every: v.windowPeriod, fn: max, createEmpty: false)
                   |> drop(columns: ["_field","_start","_stop","job","namespace","task", "host", "task_group"])
                   |> map(fn: (r) => ({ r with _measurement: strings.replaceAll(v: r._measurement, t: "nomad_client_allocs_memory_", u: "") }))
                   |> yield(name: "last")
-        width: 7
+        width: 6
         xCol: _time
-        xPos: 5
         yCol: _value
+        yPos: 1
+      - colors:
+          - hex: '#00C9FF'
+            id: base
+            name: laser
+            type: text
+        decimalPlaces: 0
+        height: 1
+        kind: Single_Stat
+        name: Current Task Allocated Memory
+        queries:
+          - query: |-
+                from(bucket: "nomad")
+                  |> range(start: -10s, stop: v.timeRangeStop)
+                  |> filter(fn: (r) => r["_measurement"] == "nomad_client_allocs_memory_allocated")
+                  |> filter(fn: (r) => r["task"] == "wave")
+                  |> unique(column: "_measurement")
+                  |> map(fn: (r) => ({_value: r._value/1024.0/1024.0}))
+                  |> yield(name: "alloc")
+        suffix: ' MiB'
+        width: 4
+        yPos: 4
+      - axes:
+          - base: "10"
+            name: x
+            scale: linear
+          - name: "y"
+            scale: linear
+        colors:
+          - hex: '#DC4E58'
+            id: c44cd48a-7321-443f-bcce-e33296f6ce8a
+            name: Solid Red
+            type: scale
+          - hex: '#DC4E58'
+            id: aa14784f-45e5-4836-ae2c-07eca8b42b3a
+            name: Solid Red
+            type: scale
+          - hex: '#DC4E58'
+            id: b5cc6639-666c-4d1f-a957-65edf9b3f300
+            name: Solid Red
+            type: scale
+        generateYAxisTicks:
+          - yTickStart
+          - yTickStep
+        geom: step
+        height: 1
+        hoverDimension: auto
+        kind: Xy
+        legendColorizeRows: true
+        legendOpacity: 1
+        legendOrientationThreshold: 1e+08
+        name: OOM Kill Events
+        note: |-
+            If the `wave` task is OOM Killed, this
+            section will show the count per interval.
+        noteOnEmpty: true
+        position: overlaid
+        queries:
+          - query: |-
+                from(bucket: "nomad")
+                  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)
+                  |> filter(fn: (r) => r["_measurement"] == "nomad_client_allocs_oom_killed")
+                  |> derivative(unit: 10s, nonNegative: true)
+                  |> yield(name: "nonnegative derivative")
+        shade: true
+        width: 12
+        yPos: 5
+        yTickStep: 1
+      - colors:
+          - hex: '#00C9FF'
+            id: base
+            name: laser
+            type: text
+        decimalPlaces: 0
+        height: 1
+        kind: Single_Stat
+        name: Max Memory Usage for Period
+        queries:
+          - query: |-
+                from(bucket: "nomad")
+                  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)
+                  |> filter(fn: (r) => r["_measurement"] == "nomad_client_allocs_memory_max_usage")
+                  |> filter(fn: (r) => r["task"] == "wave")
+                  |> map (fn: (r) => ({_value: r._value / 1024.0 / 1024.0}))
+                  |> max(column: "_value")
+                  |> yield(name: "max")
+        suffix: ' MiB'
+        width: 4
+        xPos: 4
+        yPos: 4
+      - axes:
+          - base: "10"
+            name: x
+            scale: linear
+          - base: "10"
+            name: "y"
+            scale: linear
+        colors:
+          - hex: '#31C0F6'
+            id: 28b0e6ac-801c-46ee-a1a8-f15a263e5561
+            name: Nineteen Eighty Four
+            type: scale
+          - hex: '#A500A5'
+            id: 91514c6c-4d80-44ae-97bb-6e09989322c5
+            name: Nineteen Eighty Four
+            type: scale
+          - hex: '#FF7E27'
+            id: 9a93df20-aab8-4299-ad98-e76d45c10a08
+            name: Nineteen Eighty Four
+            type: scale
+        geom: line
+        height: 3
+        hoverDimension: auto
+        kind: Xy
+        legendColorizeRows: true
+        legendOpacity: 1
+        legendOrientationThreshold: 1e+08
+        name: CPU Stats
+        position: stacked
+        queries:
+          - query: |-
+                import "strings"
+                from(bucket: "nomad")
+                  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)
+                  |> filter(fn: (r) => r["_measurement"] == "nomad_client_allocs_cpu_system" or r["_measurement"] == "nomad_client_allocs_cpu_user" )
+                  |> filter(fn: (r) => r["task"] == "wave")
+                  |> aggregateWindow(every: 10s, fn: max, createEmpty: false)
+                  |> drop(columns: ["_field","_start","_stop","job","namespace","task", "host", "task_group"])
+                  |> map(fn: (r) => ({ r with _measurement: strings.replaceAll(v: r._measurement, t: "nomad_client_allocs_cpu_", u: "") }))
+                  |> yield(name: "max")
+        width: 6
+        xCol: _time
+        xPos: 6
+        yCol: _value
+        yPos: 1
+      - colors:
+          - hex: '#00C9FF'
+            id: base
+            name: laser
+            type: text
+        decimalPlaces: 0
+        height: 1
+        kind: Single_Stat
+        name: Average Memory Usage for Period
+        queries:
+          - query: |-
+                from(bucket: "nomad")
+                  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)
+                  |> filter(fn: (r) => r["_measurement"] == "nomad_client_allocs_memory_rss")
+                  |> filter(fn: (r) => r["task"] == "wave")
+                  |> map (fn: (r) => ({_value: r._value / 1024.0 / 1024.0}))
+                  |> mean(column: "_value")
+                  |> yield(name: "mean")
+        suffix: ' MiB'
+        width: 4
+        xPos: 8
+        yPos: 4
     description: Used for Nomad Memory Oversubscription Demo
     name: Wave Dashboard

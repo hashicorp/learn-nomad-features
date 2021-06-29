@@ -1,10 +1,5 @@
-# Nomad Feature Tutorial Support Material
+# Nomad Oversubscribe Memory Support Material
 
-This repository contains Nomad job files, Dockerfiles, and sample applications
-that are used in or to support Nomad feature tutorials on
-[HashiCorp Learn](https://learn.hashicorp.com/nomad)
+Support materials for the [“Oversubscribe Memory” tutorial](https://learn.hashicorp.com/tutorials/nomad/memory-oversubscription).
 
-## Directories
-
-- **memory-oversubscription** — Support materials for the [“Oversubscribe Memory” tutorial]()
-  
+The `memory-wave` folder contains the source code and a Dockerfile that can be used to build it locally.

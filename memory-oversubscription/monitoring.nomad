@@ -5,14 +5,14 @@ job "monitoring" {
     network {
       mode = "host"
 
-      port "db" {
+      port "influx" {
         static = 8086
       }
     }
 
     service {
       name = "influx"
-      port = "db"
+      port = "influx"
     }
 
     task "prestart" {
@@ -75,11 +75,12 @@ job "monitoring" {
         DOCKER_INFLUXDB_INIT_PASSWORD = "password"
         DOCKER_INFLUXDB_INIT_ORG = "Nomad"
         DOCKER_INFLUXDB_INIT_BUCKET = "nomad"
+        DOCKER_INFLUXDB_INIT_RETENTION = "1h"
       }
 
       config {
         image = "influxdb:2.0.7"
-        ports = ["db"]
+        ports = ["influx"]
 
         mount {
           type   = "bind"

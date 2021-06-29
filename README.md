@@ -6,5 +6,5 @@ that are used in or to support Nomad feature tutorials on
 
 ## Directories
 
-- **memory-oversubscription** — Support materials for the [“Oversubscribe Memory” tutorial]()
+- **memory-oversubscription** — Support materials for the [“Oversubscribe Memory” tutorial](https://learn.hashicorp.com/tutorials/nomad/memory-oversubscription)
   
