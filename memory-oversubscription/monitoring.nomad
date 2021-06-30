@@ -20,12 +20,6 @@ job "monitoring" {
       port "statsd" {
         static = 8125
       }
-      port "udp" {
-        static = 8092
-      }
-      port "tcp" {
-        static = 8094
-      }
     }
 
     service {
@@ -116,7 +110,7 @@ job "monitoring" {
       driver = "docker"
       config {
         image = "telegraf:1.19"
-        ports = ["statsd","udp","tcp"]
+        ports = ["statsd"]
 
         mount {
           type     = "bind"
