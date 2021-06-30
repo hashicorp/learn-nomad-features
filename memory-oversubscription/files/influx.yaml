@@ -1,23 +1,7 @@
 apiVersion: influxdata.com/v2alpha1
-kind: Variable
-metadata:
-    name: fervent-ride-be7003
-spec:
-    language: flux
-    name: nomad_clients
-    query: |-
-        from(bucket: "nomad")
-          |> range(start: v.timeRangeStart, stop: v.timeRangeStop)
-          |> filter(fn: (r) => r["_measurement"] == "nomad_client_uptime")
-          |> keep(columns:["host"])
-          |> group(columns: ["host"])
-          |> yield(name: "clients")
-    type: query
----
-apiVersion: influxdata.com/v2alpha1
 kind: Dashboard
 metadata:
-    name: eerie-wu-047001
+    name: romantic-nash-76e001
 spec:
     charts:
       - axes:
@@ -191,10 +175,9 @@ spec:
                   |> yield(name: "nonnegative derivative")
         shade: true
         width: 4
-        xCol: _time
         xPos: 8
-        yCol: _value
         yPos: 3
         yTickStep: 1
     description: Used for Nomad Memory Oversubscription Demo
     name: Wave Dashboard
+

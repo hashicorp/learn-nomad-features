@@ -20,7 +20,7 @@ consul {
 }
 
 telemetry {
+  datadog_address = "192.168.2.23:8125"
   publish_allocation_metrics = true
   publish_node_metrics       = true
-  prometheus_metrics         = true
 }

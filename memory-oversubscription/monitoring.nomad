@@ -1,3 +1,12 @@
+locals {
+  username = "admin"
+  password = "password"
+  org = "Nomad"
+  bucket = "nomad"
+  retention = "1h"
+  admin_token = "static-predefined-token"
+}
+
 job "monitoring" {
   datacenters = ["dc1"]
 
@@ -7,6 +16,15 @@ job "monitoring" {
 
       port "influx" {
         static = 8086
+      }
+      port "statsd" {
+        static = 8125
+      }
+      port "udp" {
+        static = 8092
+      }
+      port "tcp" {
+        static = 8094
       }
     }
 
@@ -30,19 +48,8 @@ job "monitoring" {
       }
 
       template {
-        data        = file("files/nomad_scraper.json.tmpl")
-        destination = "../alloc/nomad_scraper.json.tmpl"
-      }
-
-      template {
         data        = file("files/influx_setup.sh")
         destination = "../alloc/docker-entrypoint-initdb.d/influx_setup.sh"
-        perms       = 755
-      }
-
-      template {
-        data        = file("files/influx_poststart.sh")
-        destination = "../alloc/influx_poststart.sh"
         perms       = 755
       }
 
@@ -52,30 +59,17 @@ job "monitoring" {
       }
     }
 
-    task "poststart" {
-      driver = "docker"
-
-      lifecycle {
-        hook    = "poststart"
-        sidecar = "false"
-      }
-
-      config {
-        image      = "curlimages/curl:7.77.0"
-        entrypoint = ["/alloc/influx_poststart.sh"]
-      }
-    }
-
     task "influx" {
       driver = "docker"
 
-      env {
-        DOCKER_INFLUXDB_INIT_MODE = "setup"
-        DOCKER_INFLUXDB_INIT_USERNAME = "admin"
-        DOCKER_INFLUXDB_INIT_PASSWORD = "password"
-        DOCKER_INFLUXDB_INIT_ORG = "Nomad"
-        DOCKER_INFLUXDB_INIT_BUCKET = "nomad"
-        DOCKER_INFLUXDB_INIT_RETENTION = "1h"
+      env  {
+        DOCKER_INFLUXDB_INIT_MODE        = "setup"
+        DOCKER_INFLUXDB_INIT_USERNAME    = local.username
+        DOCKER_INFLUXDB_INIT_PASSWORD    = local.password
+        DOCKER_INFLUXDB_INIT_ORG         = local.org
+        DOCKER_INFLUXDB_INIT_BUCKET      = local.bucket
+        DOCKER_INFLUXDB_INIT_RETENTION   = local.retention
+        DOCKER_INFLUXDB_INIT_ADMIN_TOKEN = local.admin_token
       }
 
       config {
@@ -104,6 +98,37 @@ job "monitoring" {
       resources {
         cpu    = 1000
         memory = 1024
+      }
+    }
+
+    task "telegraf" {
+      lifecycle {
+        hook    = "poststart"
+        sidecar = "true"
+      }
+
+      env  {
+        INFLUX_ORG    = local.org
+        INFLUX_BUCKET = local.bucket
+        INFLUX_TOKEN  = local.admin_token
+      }
+
+      driver = "docker"
+      config {
+        image = "telegraf:1.19"
+        ports = ["statsd","udp","tcp"]
+
+        mount {
+          type     = "bind"
+          source   = "local/telegraf.conf"
+          target   = "/etc/telegraf/telegraf.conf"
+          readonly = true
+        }
+      }
+
+      template {
+        data        = file("files/telegraf.conf")
+        destination = "local/telegraf.conf"
       }
     }
   }
