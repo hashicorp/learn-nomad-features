@@ -1,4 +1,7 @@
 #!/bin/bash
+# Copyright (c) HashiCorp, Inc.
+# SPDX-License-Identifier: MPL-2.0
+
 
 # This does almost all of the heavy lifting since the initial org, bucket, and
 # user are built using environment variables passed to the container. This step

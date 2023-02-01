@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) HashiCorp, Inc.
+ * SPDX-License-Identifier: MPL-2.0
+ */
+
 #if defined(__linux__)
 // https://linux.die.net/man/3/malloc_usable_size
 #include <malloc.h>
