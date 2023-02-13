@@ -1,4 +1,7 @@
 #!/bin/sh
+# Copyright (c) HashiCorp, Inc.
+# SPDX-License-Identifier: MPL-2.0
+
 
 # This script will be run by Nomad before Influx has run the `influx_setup.sh`
 # script which creates the `influx.env` file, so it needs to wait for it. Absent
